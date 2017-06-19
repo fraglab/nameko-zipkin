@@ -4,6 +4,7 @@ from py_zipkin.util import generate_random_64bit_string
 
 from nameko_zipkin.constants import *
 from nameko_zipkin.transport import Transport
+from nameko_zipkin.method_proxy import monkey_patch
 
 
 class Zipkin(DependencyProvider):
@@ -11,6 +12,9 @@ class Zipkin(DependencyProvider):
 
     def __init__(self):
         self.spans = {}
+
+    def setup(self):
+        monkey_patch(self.transport.handle)
 
     def get_dependency(self, worker_ctx):
         zipkin_attrs = _read_zipkin_attrs(worker_ctx)
