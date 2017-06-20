@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from setuptools import setup
 
-__version__ = '0.0.1'
+__version__ = '0.1.0'
 
 setup(
     name='nameko-zipkin',
@@ -14,5 +14,6 @@ setup(
     packages=['nameko_zipkin'],
     install_requires=[
         'py_zipkin>=0.7.1',
+        'nameko>=2.6.0',
     ],
 )
