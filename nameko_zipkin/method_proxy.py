@@ -21,9 +21,13 @@ def monkey_patch(transport_handler):
         span = zipkin.zipkin_client_span(self.service_name,
                                          self.method_name,
                                          transport_handler=transport_handler)
-        self.worker_ctx.data.update(zipkin.create_http_headers_for_new_span())
-        reply = _call(self, *args, **kwargs)
         span.start()
+        self.worker_ctx.data.update(zipkin.create_http_headers_for_new_span())
+        try:
+            reply = _call(self, *args, **kwargs)
+        except:
+            span.stop()
+            raise
         return TracedRpcReply(reply.reply_event, span)
 
     if _call.__name__ != _call_traced.__name__:
