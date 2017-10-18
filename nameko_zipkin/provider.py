@@ -5,6 +5,7 @@ from py_zipkin.util import generate_random_64bit_string
 from nameko_zipkin.constants import *
 from nameko_zipkin.transport import Transport
 from nameko_zipkin.method_proxy import monkey_patch
+from nameko_zipkin.utils import start_span, stop_span
 
 
 class Zipkin(DependencyProvider):
@@ -34,12 +35,12 @@ class Zipkin(DependencyProvider):
         span = self.spans.get(worker_ctx.call_id)
         if span:
             worker_ctx.data[PARENT_SPAN_ID_HEADER] = span.zipkin_attrs.span_id
-            span.start()
+            start_span(span)
 
     def worker_teardown(self, worker_ctx):
         span = self.spans.get(worker_ctx.call_id)
         if span:
-            span.stop()
+            stop_span(span)
             del self.spans[worker_ctx.call_id]
 
 

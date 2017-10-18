@@ -1,6 +1,8 @@
 from nameko.rpc import MethodProxy, RpcReply
 from py_zipkin import zipkin
 
+from nameko_zipkin.utils import stop_span, start_span
+
 
 class TracedRpcReply(RpcReply):
     def __init__(self, reply_event, zipkin_span):
@@ -11,7 +13,7 @@ class TracedRpcReply(RpcReply):
         try:
             return super().result()
         finally:
-            self.zipkin_span.stop()
+            stop_span(self.zipkin_span)
 
 
 def monkey_patch(transport_handler):
@@ -21,12 +23,12 @@ def monkey_patch(transport_handler):
         span = zipkin.zipkin_client_span(self.service_name,
                                          self.method_name,
                                          transport_handler=transport_handler)
-        span.start()
+        start_span(span)
         self.worker_ctx.data.update(zipkin.create_http_headers_for_new_span())
         try:
             reply = _call(self, *args, **kwargs)
         except:
-            span.stop()
+            stop_span(span)
             raise
         return TracedRpcReply(reply.reply_event, span)
 
